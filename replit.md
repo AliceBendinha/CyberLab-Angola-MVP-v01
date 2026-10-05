@@ -1,44 +1,58 @@
-# [Project name]
+# CyberLab Angola
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Uma fundação web/PWA para uma proposta de aprendizagem prática em cibersegurança.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/cyberlab-angola run dev` — frontend web/PWA
+- `pnpm --filter @workspace/api-server run dev` — Express API
+- `pnpm --filter @workspace/api-server run db:generate` — generate Prisma Client
+- `pnpm --filter @workspace/api-server run db:validate` — validate Prisma schema
+- `pnpm run typecheck` — typecheck libraries and workspace packages
+- `pnpm run build` — typecheck and build workspace packages
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate typed API client and validators
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- pnpm workspaces, Node.js, TypeScript
+- Frontend: React, Vite, Tailwind CSS, React Router, PWA
+- API: Express 5, REST, OpenAPI
+- DB: PostgreSQL + Prisma ORM
+- API code generation: Orval + Zod
+- Backend bundling: esbuild
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/cyberlab-angola/` — React frontend and PWA
+- `artifacts/api-server/` — Express API and future backend extension points
+- `artifacts/api-server/prisma/schema.prisma` — Prisma schema associado ao serviço backend
+- `lib/api-spec/openapi.yaml` — REST contract
+- `docs/architecture.md` — architecture overview
+- `README.md` — local setup and MVP scope
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The Replit starter is a pnpm monorepo and its root preinstall rejects npm; retain pnpm and the existing workspace rather than introducing a second package lock.
+- Frontend and API remain separate services; the API is routed under `/api`.
+- Prisma is the selected ORM for CyberLab. The unused template Drizzle library is not connected to the API.
+- The UI is intentionally a proposal, not a validated or operational learning product.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+MVP v0.1 contains the landing page, visual-only login and registration, a dashboard placeholder, PWA setup, and the API health route. It contains no real auth, AI, mission, skills, talent discovery, or institutional dashboard functionality.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep the initial scope limited to the foundation specification; do not add features from later prompts.
+- Never present fictional INTELLICO data as real or imply product validation.
+- Keep API keys and secrets on the backend, never in the frontend.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The API validates `DATABASE_URL` and connects via Prisma at startup.
+- A root `.env` is read by the API; copy `.env.example` to `.env` for local development.
+- API contract changes require `pnpm --filter @workspace/api-spec run codegen`.
+- Replit service workflows supply `PORT` and `BASE_PATH`; local Vite defaults to port 5173.
 
 ## Pointers
 

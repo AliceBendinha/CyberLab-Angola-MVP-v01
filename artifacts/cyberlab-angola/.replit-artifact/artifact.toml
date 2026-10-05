@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "CyberLab Angola"
+description = "Plataforma web responsiva de aprendizagem prática em cibersegurança, preparada para evoluir por fases."
+version = "1.0.0"
+id = "artifacts/cyberlab-angola"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21191
+
+[services.development]
+run = "pnpm --filter @workspace/cyberlab-angola run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cyberlab-angola", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cyberlab-angola/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21191"
+BASE_PATH = "/"

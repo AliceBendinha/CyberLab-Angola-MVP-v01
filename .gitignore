@@ -10,6 +10,13 @@ out-tsc
 
 # dependencies
 node_modules
+.env
+.env.*
+!.env.example
+
+# Prisma local databases
+artifacts/api-server/prisma/*.db
+artifacts/api-server/prisma/*.db-journal
 
 # IDEs and editors
 /.idea

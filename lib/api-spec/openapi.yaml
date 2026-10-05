@@ -11,6 +11,19 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /health:
+    get:
+      operationId: getApiHealth
+      tags: [health]
+      summary: CyberLab Angola API health check
+      description: Returns the health status of the CyberLab Angola API
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiHealth"
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +39,18 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    ApiHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          const: ok
+        service:
+          type: string
+          const: CyberLab Angola API
+      required:
+        - status
+        - service
     HealthStatus:
       type: object
       properties:
