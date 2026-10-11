@@ -1,0 +1,1 @@
+- [Prisma schema placement](prisma-schema-placement.md) — keep the schema in the owning API package so Prisma resolves that package’s CLI and client in pnpm workspaces.
