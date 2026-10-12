@@ -1,1 +1,2 @@
 - [Prisma schema placement](prisma-schema-placement.md) — keep the schema in the owning API package so Prisma resolves that package’s CLI and client in pnpm workspaces.
+- [Replit runtime environment labels](replit-env-labels.md) — do not infer the database target from `REPLIT_ENVIRONMENT` alone; verify the active development context.

@@ -27,3 +27,95 @@ export const HealthCheckResponse = zod.object({
 })
 
 
+/**
+ * Creates a public STUDENT account and starts a secure session.
+ * @summary Create a student account
+ */
+export const registerAuthUserBodyNameMax = 120;
+
+export const registerAuthUserBodyEmailMax = 254;
+
+export const registerAuthUserBodyPasswordMin = 8;
+export const registerAuthUserBodyPasswordMax = 72;
+
+
+
+export const RegisterAuthUserBody = zod.object({
+  "name": zod.string().min(1).max(registerAuthUserBodyNameMax),
+  "email": zod.string().email().max(registerAuthUserBodyEmailMax),
+  "password": zod.string().min(registerAuthUserBodyPasswordMin).max(registerAuthUserBodyPasswordMax)
+})
+
+export const RegisterAuthUserResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string().email(),
+  "role": zod.enum(['STUDENT', 'INSTRUCTOR', 'ADMIN'])
+})
+
+
+/**
+ * Validates credentials and starts a secure session.
+ * @summary Sign in
+ */
+export const loginAuthUserBodyEmailMax = 254;
+
+export const loginAuthUserBodyPasswordMax = 72;
+
+
+
+export const LoginAuthUserBody = zod.object({
+  "email": zod.string().email().max(loginAuthUserBodyEmailMax),
+  "password": zod.string().min(1).max(loginAuthUserBodyPasswordMax)
+})
+
+export const LoginAuthUserResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string().email(),
+  "role": zod.enum(['STUDENT', 'INSTRUCTOR', 'ADMIN'])
+})
+
+
+/**
+ * @summary Get the current authenticated user
+ */
+export const GetAuthMeResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string().email(),
+  "role": zod.enum(['STUDENT', 'INSTRUCTOR', 'ADMIN'])
+})
+
+
+/**
+ * Invalidates the session cookie when present and clears it.
+ * @summary End the current session
+ */
+export const LogoutAuthUserResponse = zod.void()
+
+
+/**
+ * @summary Verify authenticated access for every role
+ */
+export const GetStudentRoleTestResponse = zod.object({
+  "ok": zod.literal(true)
+})
+
+
+/**
+ * @summary Verify instructor or administrator access
+ */
+export const GetInstructorRoleTestResponse = zod.object({
+  "ok": zod.literal(true)
+})
+
+
+/**
+ * @summary Verify administrator-only access
+ */
+export const GetAdminRoleTestResponse = zod.object({
+  "ok": zod.literal(true)
+})
+
+

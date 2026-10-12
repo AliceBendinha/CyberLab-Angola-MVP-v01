@@ -8,7 +8,7 @@ const prismaGlobal = globalThis as typeof globalThis & {
 export const prisma =
   prismaGlobal.cyberlabPrisma ??
   new PrismaClient({
-    log: env.nodeEnv === "development" ? ["warn", "error"] : ["error"],
+    log: env.nodeEnv === "development" ? ["warn"] : [],
   });
 
 if (env.nodeEnv !== "production") {

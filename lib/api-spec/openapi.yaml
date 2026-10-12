@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: User authentication and session operations
+  - name: authorization
+    description: Temporary role access checks
 paths:
   /health:
     get:
@@ -37,7 +41,187 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/register:
+    post:
+      operationId: registerAuthUser
+      tags: [auth]
+      summary: Create a student account
+      description: Creates a public STUDENT account and starts a secure session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Invalid registration input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many registration attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/login:
+    post:
+      operationId: loginAuthUser
+      tags: [auth]
+      summary: Sign in
+      description: Validates credentials and starts a secure session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Invalid login input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many login attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/me:
+    get:
+      operationId: getAuthMe
+      tags: [auth]
+      summary: Get the current authenticated user
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Current authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/logout:
+    post:
+      operationId: logoutAuthUser
+      tags: [auth]
+      summary: End the current session
+      description: Invalidates the session cookie when present and clears it.
+      responses:
+        "204":
+          description: Session ended
+  /test/student:
+    get:
+      operationId: getStudentRoleTest
+      tags: [authorization]
+      summary: Verify authenticated access for every role
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Authenticated access granted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestAccessResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /test/instructor:
+    get:
+      operationId: getInstructorRoleTest
+      tags: [authorization]
+      summary: Verify instructor or administrator access
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Authorized access granted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestAccessResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Insufficient role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /test/admin:
+    get:
+      operationId: getAdminRoleTest
+      tags: [authorization]
+      summary: Verify administrator-only access
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Authorized access granted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestAccessResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Insufficient role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: cyberlab_session
   schemas:
     ApiHealth:
       type: object
@@ -58,4 +242,66 @@ components:
           type: string
       required:
         - status
+    UserRole:
+      type: string
+      enum: [STUDENT, INSTRUCTOR, ADMIN]
+    AuthUser:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/UserRole"
+      required: [id, name, email, role]
+    RegisterInput:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 8
+          maxLength: 72
+      required: [name, email, password]
+    LoginInput:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 1
+          maxLength: 72
+      required: [email, password]
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+      required: [error]
+    TestAccessResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          const: true
+      required: [ok]
 

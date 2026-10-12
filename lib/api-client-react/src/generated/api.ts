@@ -6,22 +6,31 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
   ApiHealth,
-  HealthStatus
+  AuthUser,
+  ErrorResponse,
+  HealthStatus,
+  LoginInput,
+  RegisterInput,
+  TestAccessResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
-import type { ErrorType } from '../custom-fetch';
+import type { ErrorType , BodyType } from '../custom-fetch';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -191,6 +200,567 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getHealthCheckQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRegisterAuthUserUrl = () => {
+
+
+
+
+  return `/api/auth/register`
+}
+
+/**
+ * Creates a public STUDENT account and starts a secure session.
+ * @summary Create a student account
+ */
+export const registerAuthUser = async (registerInput: RegisterInput, options?: Parameters<typeof customFetch>[1]): Promise<AuthUser> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AuthUser>(getRegisterAuthUserUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(registerInput)
+  }
+);}
+
+
+
+
+
+export const getRegisterAuthUserMutationKey = () => ['registerAuthUser'] as const;
+
+export const getRegisterAuthUserMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthUser>>, TError,RegisterAuthUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerAuthUser>>, TError,RegisterAuthUserMutationVariables, TContext> => {
+
+const mutationKey = getRegisterAuthUserMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerAuthUser>>, RegisterAuthUserMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerAuthUser(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterAuthUserMutationResult = NonNullable<Awaited<ReturnType<typeof registerAuthUser>>>
+    export type RegisterAuthUserMutationBody = BodyType<RegisterInput>
+    export type RegisterAuthUserMutationError = ErrorType<ErrorResponse>
+    export type RegisterAuthUserMutationVariables = {data: BodyType<RegisterInput>}
+
+    /**
+ * @summary Create a student account
+ */
+export const useRegisterAuthUser = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerAuthUser>>, TError,RegisterAuthUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof registerAuthUser>>,
+        TError,
+        RegisterAuthUserMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRegisterAuthUserMutationOptions(options));
+    }
+
+export const getLoginAuthUserUrl = () => {
+
+
+
+
+  return `/api/auth/login`
+}
+
+/**
+ * Validates credentials and starts a secure session.
+ * @summary Sign in
+ */
+export const loginAuthUser = async (loginInput: LoginInput, options?: Parameters<typeof customFetch>[1]): Promise<AuthUser> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AuthUser>(getLoginAuthUserUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(loginInput)
+  }
+);}
+
+
+
+
+
+export const getLoginAuthUserMutationKey = () => ['loginAuthUser'] as const;
+
+export const getLoginAuthUserMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthUser>>, TError,LoginAuthUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof loginAuthUser>>, TError,LoginAuthUserMutationVariables, TContext> => {
+
+const mutationKey = getLoginAuthUserMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginAuthUser>>, LoginAuthUserMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  loginAuthUser(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LoginAuthUserMutationResult = NonNullable<Awaited<ReturnType<typeof loginAuthUser>>>
+    export type LoginAuthUserMutationBody = BodyType<LoginInput>
+    export type LoginAuthUserMutationError = ErrorType<ErrorResponse>
+    export type LoginAuthUserMutationVariables = {data: BodyType<LoginInput>}
+
+    /**
+ * @summary Sign in
+ */
+export const useLoginAuthUser = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthUser>>, TError,LoginAuthUserMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof loginAuthUser>>,
+        TError,
+        LoginAuthUserMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLoginAuthUserMutationOptions(options));
+    }
+
+export const getGetAuthMeUrl = () => {
+
+
+
+
+  return `/api/auth/me`
+}
+
+/**
+ * @summary Get the current authenticated user
+ */
+export const getAuthMe = async ( options?: Parameters<typeof customFetch>[1]): Promise<AuthUser> => {
+
+  return customFetch<AuthUser>(getGetAuthMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAuthMeQueryKey = () => {
+    return [
+    `/api/auth/me`
+    ] as const;
+    }
+
+
+export const getGetAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) => getAuthMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthMe>>>
+export type GetAuthMeQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the current authenticated user
+ */
+
+export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAuthMeQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getLogoutAuthUserUrl = () => {
+
+
+
+
+  return `/api/auth/logout`
+}
+
+/**
+ * Invalidates the session cookie when present and clears it.
+ * @summary End the current session
+ */
+export const logoutAuthUser = async ( options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getLogoutAuthUserUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getLogoutAuthUserMutationKey = () => ['logoutAuthUser'] as const;
+
+export const getLogoutAuthUserMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAuthUser>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutAuthUser>>, TError,void, TContext> => {
+
+const mutationKey = getLogoutAuthUserMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutAuthUser>>, void> = () => {
+
+
+          return  logoutAuthUser(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutAuthUserMutationResult = NonNullable<Awaited<ReturnType<typeof logoutAuthUser>>>
+
+    export type LogoutAuthUserMutationError = ErrorType<unknown>
+
+
+    /**
+ * @summary End the current session
+ */
+export const useLogoutAuthUser = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAuthUser>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof logoutAuthUser>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutAuthUserMutationOptions(options));
+    }
+
+export const getGetStudentRoleTestUrl = () => {
+
+
+
+
+  return `/api/test/student`
+}
+
+/**
+ * @summary Verify authenticated access for every role
+ */
+export const getStudentRoleTest = async ( options?: Parameters<typeof customFetch>[1]): Promise<TestAccessResponse> => {
+
+  return customFetch<TestAccessResponse>(getGetStudentRoleTestUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentRoleTestQueryKey = () => {
+    return [
+    `/api/test/student`
+    ] as const;
+    }
+
+
+export const getGetStudentRoleTestQueryOptions = <TData = Awaited<ReturnType<typeof getStudentRoleTest>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentRoleTest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentRoleTestQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentRoleTest>>> = ({ signal }) => getStudentRoleTest({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentRoleTest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentRoleTestQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentRoleTest>>>
+export type GetStudentRoleTestQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Verify authenticated access for every role
+ */
+
+export function useGetStudentRoleTest<TData = Awaited<ReturnType<typeof getStudentRoleTest>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentRoleTest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentRoleTestQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetInstructorRoleTestUrl = () => {
+
+
+
+
+  return `/api/test/instructor`
+}
+
+/**
+ * @summary Verify instructor or administrator access
+ */
+export const getInstructorRoleTest = async ( options?: Parameters<typeof customFetch>[1]): Promise<TestAccessResponse> => {
+
+  return customFetch<TestAccessResponse>(getGetInstructorRoleTestUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetInstructorRoleTestQueryKey = () => {
+    return [
+    `/api/test/instructor`
+    ] as const;
+    }
+
+
+export const getGetInstructorRoleTestQueryOptions = <TData = Awaited<ReturnType<typeof getInstructorRoleTest>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getInstructorRoleTest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetInstructorRoleTestQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getInstructorRoleTest>>> = ({ signal }) => getInstructorRoleTest({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getInstructorRoleTest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetInstructorRoleTestQueryResult = NonNullable<Awaited<ReturnType<typeof getInstructorRoleTest>>>
+export type GetInstructorRoleTestQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Verify instructor or administrator access
+ */
+
+export function useGetInstructorRoleTest<TData = Awaited<ReturnType<typeof getInstructorRoleTest>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getInstructorRoleTest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetInstructorRoleTestQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetAdminRoleTestUrl = () => {
+
+
+
+
+  return `/api/test/admin`
+}
+
+/**
+ * @summary Verify administrator-only access
+ */
+export const getAdminRoleTest = async ( options?: Parameters<typeof customFetch>[1]): Promise<TestAccessResponse> => {
+
+  return customFetch<TestAccessResponse>(getGetAdminRoleTestUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminRoleTestQueryKey = () => {
+    return [
+    `/api/test/admin`
+    ] as const;
+    }
+
+
+export const getGetAdminRoleTestQueryOptions = <TData = Awaited<ReturnType<typeof getAdminRoleTest>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminRoleTest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminRoleTestQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminRoleTest>>> = ({ signal }) => getAdminRoleTest({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminRoleTest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminRoleTestQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminRoleTest>>>
+export type GetAdminRoleTestQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Verify administrator-only access
+ */
+
+export function useGetAdminRoleTest<TData = Awaited<ReturnType<typeof getAdminRoleTest>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminRoleTest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminRoleTestQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

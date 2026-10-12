@@ -42,6 +42,14 @@ function parseDatabaseUrl(value: string): string {
   return value;
 }
 
+function parseSessionSecret(value: string): string {
+  if (Buffer.byteLength(value, "utf8") < 32) {
+    throw new Error("SESSION_SECRET must contain at least 32 bytes");
+  }
+
+  return value;
+}
+
 function parseCorsOrigins(value: string | undefined): string[] {
   const origins = (value ?? "http://localhost:5173")
     .split(",")
@@ -75,6 +83,7 @@ if (!["development", "production", "test"].includes(nodeEnv)) {
 export const env = {
   port: parsePort(requiredString("PORT")),
   databaseUrl: parseDatabaseUrl(requiredString("DATABASE_URL")),
+  sessionSecret: parseSessionSecret(requiredString("SESSION_SECRET")),
   corsOrigins: parseCorsOrigins(process.env.CORS_ORIGINS),
   nodeEnv,
 } as const;

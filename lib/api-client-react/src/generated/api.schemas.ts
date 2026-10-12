@@ -15,3 +15,53 @@ export interface HealthStatus {
   status: string;
 }
 
+export type UserRole = typeof UserRole[keyof typeof UserRole];
+
+
+export const UserRole = {
+  STUDENT: 'STUDENT',
+  INSTRUCTOR: 'INSTRUCTOR',
+  ADMIN: 'ADMIN',
+} as const;
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface RegisterInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 8
+     * @maxLength 72
+     */
+  password: string;
+}
+
+export interface LoginInput {
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 1
+     * @maxLength 72
+     */
+  password: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+}
+
+export const TestAccessResponseValue = {
+  ok: true,
+} as const;
+export type TestAccessResponse = typeof TestAccessResponseValue;
+
