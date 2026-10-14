@@ -119,3 +119,412 @@ export const GetAdminRoleTestResponse = zod.object({
 })
 
 
+/**
+ * @summary Get the authenticated student's own profile
+ */
+export const GetStudentMeResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string().email(),
+  "learningLevel": zod.enum(['BEGINNER', 'ELEMENTARY', 'INTERMEDIATE']),
+  "diagnosticCompleted": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update the authenticated student's display name
+ */
+export const updateStudentMeBodyNameMax = 120;
+
+
+
+export const UpdateStudentMeBody = zod.object({
+  "name": zod.string().min(1).max(updateStudentMeBodyNameMax)
+})
+
+export const UpdateStudentMeResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string().email(),
+  "learningLevel": zod.enum(['BEGINNER', 'ELEMENTARY', 'INTERMEDIATE']),
+  "diagnosticCompleted": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List published learning modules and the current student's progress
+ */
+export const listLearningModulesResponseMissionCountMin = 0;
+
+export const listLearningModulesResponseProgressCompletedMissionsMin = 0;
+
+export const listLearningModulesResponseProgressTotalMissionsMin = 0;
+
+export const listLearningModulesResponseProgressPointsEarnedMin = 0;
+
+export const listLearningModulesResponseProgressPointsAvailableMin = 0;
+
+export const listLearningModulesResponseProgressCompletionPercentMin = 0;
+export const listLearningModulesResponseProgressCompletionPercentMax = 100;
+
+
+
+export const ListLearningModulesResponseItem = zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string(),
+  "order": zod.number().int(),
+  "missionCount": zod.number().int().min(listLearningModulesResponseMissionCountMin),
+  "progress": zod.object({
+  "completedMissions": zod.number().int().min(listLearningModulesResponseProgressCompletedMissionsMin),
+  "totalMissions": zod.number().int().min(listLearningModulesResponseProgressTotalMissionsMin),
+  "pointsEarned": zod.number().int().min(listLearningModulesResponseProgressPointsEarnedMin),
+  "pointsAvailable": zod.number().int().min(listLearningModulesResponseProgressPointsAvailableMin),
+  "completionPercent": zod.number().int().min(listLearningModulesResponseProgressCompletionPercentMin).max(listLearningModulesResponseProgressCompletionPercentMax),
+  "lastActivityAt": zod.coerce.date().nullable()
+})
+})
+export const ListLearningModulesResponse = zod.array(ListLearningModulesResponseItem)
+
+
+/**
+ * @summary Get one published module
+ */
+export const getLearningModulePathSlugMax = 120;
+
+
+
+export const GetLearningModuleParams = zod.object({
+  "slug": zod.coerce.string().min(1).max(getLearningModulePathSlugMax)
+})
+
+export const getLearningModuleResponseMissionCountMin = 0;
+
+export const getLearningModuleResponseProgressCompletedMissionsMin = 0;
+
+export const getLearningModuleResponseProgressTotalMissionsMin = 0;
+
+export const getLearningModuleResponseProgressPointsEarnedMin = 0;
+
+export const getLearningModuleResponseProgressPointsAvailableMin = 0;
+
+export const getLearningModuleResponseProgressCompletionPercentMin = 0;
+export const getLearningModuleResponseProgressCompletionPercentMax = 100;
+
+
+
+export const GetLearningModuleResponse = zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string(),
+  "order": zod.number().int(),
+  "missionCount": zod.number().int().min(getLearningModuleResponseMissionCountMin),
+  "progress": zod.object({
+  "completedMissions": zod.number().int().min(getLearningModuleResponseProgressCompletedMissionsMin),
+  "totalMissions": zod.number().int().min(getLearningModuleResponseProgressTotalMissionsMin),
+  "pointsEarned": zod.number().int().min(getLearningModuleResponseProgressPointsEarnedMin),
+  "pointsAvailable": zod.number().int().min(getLearningModuleResponseProgressPointsAvailableMin),
+  "completionPercent": zod.number().int().min(getLearningModuleResponseProgressCompletionPercentMin).max(getLearningModuleResponseProgressCompletionPercentMax),
+  "lastActivityAt": zod.coerce.date().nullable()
+})
+})
+
+
+/**
+ * @summary List published missions in a published module
+ */
+export const listModuleMissionsPathSlugMax = 120;
+
+
+
+export const ListModuleMissionsParams = zod.object({
+  "slug": zod.coerce.string().min(1).max(listModuleMissionsPathSlugMax)
+})
+
+export const listModuleMissionsResponsePointsMin = 0;
+
+export const listModuleMissionsResponseAttemptCountMin = 0;
+
+export const listModuleMissionsResponseBestScoreMin = 0;
+
+
+
+export const ListModuleMissionsResponseItem = zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string(),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']),
+  "points": zod.number().int().min(listModuleMissionsResponsePointsMin),
+  "order": zod.number().int(),
+  "attemptCount": zod.number().int().min(listModuleMissionsResponseAttemptCountMin),
+  "isCompleted": zod.boolean(),
+  "bestScore": zod.number().int().min(listModuleMissionsResponseBestScoreMin).nullable(),
+  "lastAttemptAt": zod.coerce.date().nullable()
+})
+export const ListModuleMissionsResponse = zod.array(ListModuleMissionsResponseItem)
+
+
+/**
+ * @summary Get a published mission without its answer key or explanation
+ */
+export const getLearningMissionPathIdMax = 120;
+
+
+
+export const GetLearningMissionParams = zod.object({
+  "id": zod.coerce.string().min(1).max(getLearningMissionPathIdMax)
+})
+
+export const getLearningMissionResponsePointsMin = 0;
+
+export const getLearningMissionResponseAttemptCountMin = 0;
+
+export const getLearningMissionResponseBestScoreMin = 0;
+
+
+
+export const GetLearningMissionResponse = zod.object({
+  "id": zod.string(),
+  "moduleId": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string(),
+  "scenario": zod.string(),
+  "instructions": zod.string(),
+  "question": zod.string(),
+  "answerOptions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string()
+})),
+  "difficulty": zod.enum(['EASY', 'MEDIUM', 'HARD']),
+  "points": zod.number().int().min(getLearningMissionResponsePointsMin),
+  "order": zod.number().int(),
+  "attemptCount": zod.number().int().min(getLearningMissionResponseAttemptCountMin),
+  "isCompleted": zod.boolean(),
+  "bestScore": zod.number().int().min(getLearningMissionResponseBestScoreMin).nullable()
+})
+
+
+/**
+ * @summary List only the authenticated student's attempts for a mission
+ */
+export const listMissionAttemptsPathIdMax = 120;
+
+
+
+export const ListMissionAttemptsParams = zod.object({
+  "id": zod.coerce.string().min(1).max(listMissionAttemptsPathIdMax)
+})
+
+export const listMissionAttemptsResponseScoreMin = 0;
+
+
+
+
+export const ListMissionAttemptsResponseItem = zod.object({
+  "id": zod.string(),
+  "missionId": zod.string(),
+  "missionTitle": zod.string(),
+  "submittedAnswerText": zod.string(),
+  "isCorrect": zod.boolean(),
+  "score": zod.number().int().min(listMissionAttemptsResponseScoreMin),
+  "attemptNumber": zod.number().int().min(1),
+  "startedAt": zod.coerce.date(),
+  "completedAt": zod.coerce.date()
+})
+export const ListMissionAttemptsResponse = zod.array(ListMissionAttemptsResponseItem)
+
+
+/**
+ * @summary Submit and score an answer on the server
+ */
+export const submitMissionAttemptPathIdMax = 120;
+
+
+
+export const SubmitMissionAttemptParams = zod.object({
+  "id": zod.coerce.string().min(1).max(submitMissionAttemptPathIdMax)
+})
+
+export const submitMissionAttemptBodySubmittedAnswerMax = 120;
+
+
+
+export const SubmitMissionAttemptBody = zod.object({
+  "submittedAnswer": zod.string().min(1).max(submitMissionAttemptBodySubmittedAnswerMax)
+})
+
+export const submitMissionAttemptResponseScoreMin = 0;
+
+export const submitMissionAttemptResponseMaxScoreMin = 0;
+
+
+
+
+export const SubmitMissionAttemptResponse = zod.object({
+  "id": zod.string(),
+  "missionId": zod.string(),
+  "submittedAnswerText": zod.string(),
+  "isCorrect": zod.boolean(),
+  "score": zod.number().int().min(submitMissionAttemptResponseScoreMin),
+  "maxScore": zod.number().int().min(submitMissionAttemptResponseMaxScoreMin),
+  "attemptNumber": zod.number().int().min(1),
+  "feedback": zod.string(),
+  "explanation": zod.string(),
+  "completedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get the authenticated student's progress and learning history
+ */
+export const getStudentProgressResponseCompletedMissionsMin = 0;
+
+export const getStudentProgressResponseTotalMissionsMin = 0;
+
+export const getStudentProgressResponsePointsEarnedMin = 0;
+
+export const getStudentProgressResponsePointsAvailableMin = 0;
+
+export const getStudentProgressResponseCompletionPercentMin = 0;
+export const getStudentProgressResponseCompletionPercentMax = 100;
+
+export const getStudentProgressResponseModulesItemMissionCountMin = 0;
+
+export const getStudentProgressResponseModulesItemProgressCompletedMissionsMin = 0;
+
+export const getStudentProgressResponseModulesItemProgressTotalMissionsMin = 0;
+
+export const getStudentProgressResponseModulesItemProgressPointsEarnedMin = 0;
+
+export const getStudentProgressResponseModulesItemProgressPointsAvailableMin = 0;
+
+export const getStudentProgressResponseModulesItemProgressCompletionPercentMin = 0;
+export const getStudentProgressResponseModulesItemProgressCompletionPercentMax = 100;
+
+export const getStudentProgressResponseRecentAttemptsItemScoreMin = 0;
+
+
+export const getStudentProgressResponseDiagnosticHistoryItemScoreMin = 0;
+export const getStudentProgressResponseDiagnosticHistoryItemScoreMax = 100;
+
+export const getStudentProgressResponseDiagnosticHistoryItemCorrectAnswersMin = 0;
+
+
+
+
+export const GetStudentProgressResponse = zod.object({
+  "learningLevel": zod.enum(['BEGINNER', 'ELEMENTARY', 'INTERMEDIATE']),
+  "completedMissions": zod.number().int().min(getStudentProgressResponseCompletedMissionsMin),
+  "totalMissions": zod.number().int().min(getStudentProgressResponseTotalMissionsMin),
+  "pointsEarned": zod.number().int().min(getStudentProgressResponsePointsEarnedMin),
+  "pointsAvailable": zod.number().int().min(getStudentProgressResponsePointsAvailableMin),
+  "completionPercent": zod.number().int().min(getStudentProgressResponseCompletionPercentMin).max(getStudentProgressResponseCompletionPercentMax),
+  "modules": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string(),
+  "order": zod.number().int(),
+  "missionCount": zod.number().int().min(getStudentProgressResponseModulesItemMissionCountMin),
+  "progress": zod.object({
+  "completedMissions": zod.number().int().min(getStudentProgressResponseModulesItemProgressCompletedMissionsMin),
+  "totalMissions": zod.number().int().min(getStudentProgressResponseModulesItemProgressTotalMissionsMin),
+  "pointsEarned": zod.number().int().min(getStudentProgressResponseModulesItemProgressPointsEarnedMin),
+  "pointsAvailable": zod.number().int().min(getStudentProgressResponseModulesItemProgressPointsAvailableMin),
+  "completionPercent": zod.number().int().min(getStudentProgressResponseModulesItemProgressCompletionPercentMin).max(getStudentProgressResponseModulesItemProgressCompletionPercentMax),
+  "lastActivityAt": zod.coerce.date().nullable()
+})
+})),
+  "recentAttempts": zod.array(zod.object({
+  "id": zod.string(),
+  "missionId": zod.string(),
+  "missionTitle": zod.string(),
+  "submittedAnswerText": zod.string(),
+  "isCorrect": zod.boolean(),
+  "score": zod.number().int().min(getStudentProgressResponseRecentAttemptsItemScoreMin),
+  "attemptNumber": zod.number().int().min(1),
+  "startedAt": zod.coerce.date(),
+  "completedAt": zod.coerce.date()
+})),
+  "diagnosticHistory": zod.array(zod.object({
+  "attemptId": zod.string(),
+  "score": zod.number().int().min(getStudentProgressResponseDiagnosticHistoryItemScoreMin).max(getStudentProgressResponseDiagnosticHistoryItemScoreMax),
+  "learningLevel": zod.enum(['BEGINNER', 'ELEMENTARY', 'INTERMEDIATE']),
+  "correctAnswers": zod.number().int().min(getStudentProgressResponseDiagnosticHistoryItemCorrectAnswersMin),
+  "totalQuestions": zod.number().int().min(1),
+  "completedAt": zod.coerce.date(),
+  "recommendedModule": zod.object({
+  "slug": zod.string(),
+  "title": zod.string()
+})
+}))
+})
+
+
+/**
+ * @summary Get the initial non-certifying knowledge diagnostic
+ */
+
+
+
+export const GetInitialDiagnosticResponse = zod.object({
+  "title": zod.string(),
+  "introduction": zod.string(),
+  "totalQuestions": zod.number().int().min(1),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "topic": zod.string(),
+  "question": zod.string(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string()
+}))
+}))
+})
+
+
+/**
+ * @summary Evaluate and record a diagnostic attempt
+ */
+export const submitInitialDiagnosticBodyAnswersMin = 10;
+export const submitInitialDiagnosticBodyAnswersMax = 10;
+
+
+
+export const SubmitInitialDiagnosticBody = zod.object({
+  "answers": zod.array(zod.object({
+  "questionId": zod.string(),
+  "selectedOptionId": zod.string()
+})).min(submitInitialDiagnosticBodyAnswersMin).max(submitInitialDiagnosticBodyAnswersMax)
+})
+
+export const submitInitialDiagnosticResponseScoreMin = 0;
+export const submitInitialDiagnosticResponseScoreMax = 100;
+
+export const submitInitialDiagnosticResponseCorrectAnswersMin = 0;
+
+
+
+
+export const SubmitInitialDiagnosticResponse = zod.object({
+  "attemptId": zod.string(),
+  "score": zod.number().int().min(submitInitialDiagnosticResponseScoreMin).max(submitInitialDiagnosticResponseScoreMax),
+  "correctAnswers": zod.number().int().min(submitInitialDiagnosticResponseCorrectAnswersMin),
+  "totalQuestions": zod.number().int().min(1),
+  "learningLevel": zod.enum(['BEGINNER', 'ELEMENTARY', 'INTERMEDIATE']),
+  "completedAt": zod.coerce.date(),
+  "recommendedModule": zod.object({
+  "slug": zod.string(),
+  "title": zod.string()
+})
+})
+
+

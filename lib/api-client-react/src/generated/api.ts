@@ -22,10 +22,23 @@ import type {
 import type {
   ApiHealth,
   AuthUser,
+  DiagnosticQuestionsResponse,
+  DiagnosticResultResponse,
+  DiagnosticSubmissionInput,
   ErrorResponse,
   HealthStatus,
+  LearningModuleListResponse,
+  LearningModuleSummary,
   LoginInput,
+  MissionAttemptHistoryResponse,
+  MissionAttemptInput,
+  MissionAttemptResult,
+  MissionDetailResponse,
+  ModuleMissionListResponse,
   RegisterInput,
+  StudentProfile,
+  StudentProfileUpdate,
+  StudentProgressResponse,
   TestAccessResponse
 } from './api.schemas';
 
@@ -772,4 +785,885 @@ export function useGetAdminRoleTest<TData = Awaited<ReturnType<typeof getAdminRo
 
 
 
+
+export const getGetStudentMeUrl = () => {
+
+
+
+
+  return `/api/students/me`
+}
+
+/**
+ * @summary Get the authenticated student's own profile
+ */
+export const getStudentMe = async ( options?: Parameters<typeof customFetch>[1]): Promise<StudentProfile> => {
+
+  return customFetch<StudentProfile>(getGetStudentMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentMeQueryKey = () => {
+    return [
+    `/api/students/me`
+    ] as const;
+    }
+
+
+export const getGetStudentMeQueryOptions = <TData = Awaited<ReturnType<typeof getStudentMe>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentMe>>> = ({ signal }) => getStudentMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentMe>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentMeQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentMe>>>
+export type GetStudentMeQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the authenticated student's own profile
+ */
+
+export function useGetStudentMe<TData = Awaited<ReturnType<typeof getStudentMe>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentMeQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateStudentMeUrl = () => {
+
+
+
+
+  return `/api/students/me`
+}
+
+/**
+ * @summary Update the authenticated student's display name
+ */
+export const updateStudentMe = async (studentProfileUpdate: StudentProfileUpdate, options?: Parameters<typeof customFetch>[1]): Promise<StudentProfile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<StudentProfile>(getUpdateStudentMeUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(studentProfileUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateStudentMeMutationKey = () => ['updateStudentMe'] as const;
+
+export const getUpdateStudentMeMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStudentMe>>, TError,UpdateStudentMeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateStudentMe>>, TError,UpdateStudentMeMutationVariables, TContext> => {
+
+const mutationKey = getUpdateStudentMeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateStudentMe>>, UpdateStudentMeMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateStudentMe(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateStudentMeMutationResult = NonNullable<Awaited<ReturnType<typeof updateStudentMe>>>
+    export type UpdateStudentMeMutationBody = BodyType<StudentProfileUpdate>
+    export type UpdateStudentMeMutationError = ErrorType<ErrorResponse>
+    export type UpdateStudentMeMutationVariables = {data: BodyType<StudentProfileUpdate>}
+
+    /**
+ * @summary Update the authenticated student's display name
+ */
+export const useUpdateStudentMe = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStudentMe>>, TError,UpdateStudentMeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateStudentMe>>,
+        TError,
+        UpdateStudentMeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateStudentMeMutationOptions(options));
+    }
+
+export const getListLearningModulesUrl = () => {
+
+
+
+
+  return `/api/modules`
+}
+
+/**
+ * @summary List published learning modules and the current student's progress
+ */
+export const listLearningModules = async ( options?: Parameters<typeof customFetch>[1]): Promise<LearningModuleListResponse> => {
+
+  return customFetch<LearningModuleListResponse>(getListLearningModulesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListLearningModulesQueryKey = () => {
+    return [
+    `/api/modules`
+    ] as const;
+    }
+
+
+export const getListLearningModulesQueryOptions = <TData = Awaited<ReturnType<typeof listLearningModules>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listLearningModules>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListLearningModulesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listLearningModules>>> = ({ signal }) => listLearningModules({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listLearningModules>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListLearningModulesQueryResult = NonNullable<Awaited<ReturnType<typeof listLearningModules>>>
+export type ListLearningModulesQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List published learning modules and the current student's progress
+ */
+
+export function useListLearningModules<TData = Awaited<ReturnType<typeof listLearningModules>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listLearningModules>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListLearningModulesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetLearningModuleUrl = (slug: string,) => {
+
+
+
+
+  return `/api/modules/${slug}`
+}
+
+/**
+ * @summary Get one published module
+ */
+export const getLearningModule = async (slug: string, options?: Parameters<typeof customFetch>[1]): Promise<LearningModuleSummary> => {
+
+  return customFetch<LearningModuleSummary>(getGetLearningModuleUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLearningModuleQueryKey = (slug: string,) => {
+    return [
+    `/api/modules/${slug}`
+    ] as const;
+    }
+
+
+export const getGetLearningModuleQueryOptions = <TData = Awaited<ReturnType<typeof getLearningModule>>, TError = ErrorType<ErrorResponse>>(slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLearningModule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLearningModuleQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLearningModule>>> = ({ signal }) => getLearningModule(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLearningModule>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLearningModuleQueryResult = NonNullable<Awaited<ReturnType<typeof getLearningModule>>>
+export type GetLearningModuleQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get one published module
+ */
+
+export function useGetLearningModule<TData = Awaited<ReturnType<typeof getLearningModule>>, TError = ErrorType<ErrorResponse>>(
+ slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLearningModule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLearningModuleQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListModuleMissionsUrl = (slug: string,) => {
+
+
+
+
+  return `/api/modules/${slug}/missions`
+}
+
+/**
+ * @summary List published missions in a published module
+ */
+export const listModuleMissions = async (slug: string, options?: Parameters<typeof customFetch>[1]): Promise<ModuleMissionListResponse> => {
+
+  return customFetch<ModuleMissionListResponse>(getListModuleMissionsUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListModuleMissionsQueryKey = (slug: string,) => {
+    return [
+    `/api/modules/${slug}/missions`
+    ] as const;
+    }
+
+
+export const getListModuleMissionsQueryOptions = <TData = Awaited<ReturnType<typeof listModuleMissions>>, TError = ErrorType<ErrorResponse>>(slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listModuleMissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListModuleMissionsQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listModuleMissions>>> = ({ signal }) => listModuleMissions(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listModuleMissions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListModuleMissionsQueryResult = NonNullable<Awaited<ReturnType<typeof listModuleMissions>>>
+export type ListModuleMissionsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List published missions in a published module
+ */
+
+export function useListModuleMissions<TData = Awaited<ReturnType<typeof listModuleMissions>>, TError = ErrorType<ErrorResponse>>(
+ slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listModuleMissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListModuleMissionsQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetLearningMissionUrl = (id: string,) => {
+
+
+
+
+  return `/api/missions/${id}`
+}
+
+/**
+ * @summary Get a published mission without its answer key or explanation
+ */
+export const getLearningMission = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<MissionDetailResponse> => {
+
+  return customFetch<MissionDetailResponse>(getGetLearningMissionUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLearningMissionQueryKey = (id: string,) => {
+    return [
+    `/api/missions/${id}`
+    ] as const;
+    }
+
+
+export const getGetLearningMissionQueryOptions = <TData = Awaited<ReturnType<typeof getLearningMission>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLearningMission>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLearningMissionQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLearningMission>>> = ({ signal }) => getLearningMission(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLearningMission>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLearningMissionQueryResult = NonNullable<Awaited<ReturnType<typeof getLearningMission>>>
+export type GetLearningMissionQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get a published mission without its answer key or explanation
+ */
+
+export function useGetLearningMission<TData = Awaited<ReturnType<typeof getLearningMission>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLearningMission>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLearningMissionQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListMissionAttemptsUrl = (id: string,) => {
+
+
+
+
+  return `/api/missions/${id}/attempts`
+}
+
+/**
+ * @summary List only the authenticated student's attempts for a mission
+ */
+export const listMissionAttempts = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<MissionAttemptHistoryResponse> => {
+
+  return customFetch<MissionAttemptHistoryResponse>(getListMissionAttemptsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMissionAttemptsQueryKey = (id: string,) => {
+    return [
+    `/api/missions/${id}/attempts`
+    ] as const;
+    }
+
+
+export const getListMissionAttemptsQueryOptions = <TData = Awaited<ReturnType<typeof listMissionAttempts>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMissionAttempts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMissionAttemptsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMissionAttempts>>> = ({ signal }) => listMissionAttempts(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMissionAttempts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListMissionAttemptsQueryResult = NonNullable<Awaited<ReturnType<typeof listMissionAttempts>>>
+export type ListMissionAttemptsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List only the authenticated student's attempts for a mission
+ */
+
+export function useListMissionAttempts<TData = Awaited<ReturnType<typeof listMissionAttempts>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMissionAttempts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListMissionAttemptsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSubmitMissionAttemptUrl = (id: string,) => {
+
+
+
+
+  return `/api/missions/${id}/attempts`
+}
+
+/**
+ * @summary Submit and score an answer on the server
+ */
+export const submitMissionAttempt = async (id: string,
+    missionAttemptInput: MissionAttemptInput, options?: Parameters<typeof customFetch>[1]): Promise<MissionAttemptResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<MissionAttemptResult>(getSubmitMissionAttemptUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(missionAttemptInput)
+  }
+);}
+
+
+
+
+
+export const getSubmitMissionAttemptMutationKey = () => ['submitMissionAttempt'] as const;
+
+export const getSubmitMissionAttemptMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitMissionAttempt>>, TError,SubmitMissionAttemptMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitMissionAttempt>>, TError,SubmitMissionAttemptMutationVariables, TContext> => {
+
+const mutationKey = getSubmitMissionAttemptMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitMissionAttempt>>, SubmitMissionAttemptMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  submitMissionAttempt(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitMissionAttemptMutationResult = NonNullable<Awaited<ReturnType<typeof submitMissionAttempt>>>
+    export type SubmitMissionAttemptMutationBody = BodyType<MissionAttemptInput>
+    export type SubmitMissionAttemptMutationError = ErrorType<ErrorResponse>
+    export type SubmitMissionAttemptMutationVariables = {id: string;data: BodyType<MissionAttemptInput>}
+
+    /**
+ * @summary Submit and score an answer on the server
+ */
+export const useSubmitMissionAttempt = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitMissionAttempt>>, TError,SubmitMissionAttemptMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitMissionAttempt>>,
+        TError,
+        SubmitMissionAttemptMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubmitMissionAttemptMutationOptions(options));
+    }
+
+export const getGetStudentProgressUrl = () => {
+
+
+
+
+  return `/api/students/me/progress`
+}
+
+/**
+ * @summary Get the authenticated student's progress and learning history
+ */
+export const getStudentProgress = async ( options?: Parameters<typeof customFetch>[1]): Promise<StudentProgressResponse> => {
+
+  return customFetch<StudentProgressResponse>(getGetStudentProgressUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentProgressQueryKey = () => {
+    return [
+    `/api/students/me/progress`
+    ] as const;
+    }
+
+
+export const getGetStudentProgressQueryOptions = <TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentProgressQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentProgress>>> = ({ signal }) => getStudentProgress({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentProgressQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentProgress>>>
+export type GetStudentProgressQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the authenticated student's progress and learning history
+ */
+
+export function useGetStudentProgress<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentProgressQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetInitialDiagnosticUrl = () => {
+
+
+
+
+  return `/api/diagnostic`
+}
+
+/**
+ * @summary Get the initial non-certifying knowledge diagnostic
+ */
+export const getInitialDiagnostic = async ( options?: Parameters<typeof customFetch>[1]): Promise<DiagnosticQuestionsResponse> => {
+
+  return customFetch<DiagnosticQuestionsResponse>(getGetInitialDiagnosticUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetInitialDiagnosticQueryKey = () => {
+    return [
+    `/api/diagnostic`
+    ] as const;
+    }
+
+
+export const getGetInitialDiagnosticQueryOptions = <TData = Awaited<ReturnType<typeof getInitialDiagnostic>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getInitialDiagnostic>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetInitialDiagnosticQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getInitialDiagnostic>>> = ({ signal }) => getInitialDiagnostic({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getInitialDiagnostic>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetInitialDiagnosticQueryResult = NonNullable<Awaited<ReturnType<typeof getInitialDiagnostic>>>
+export type GetInitialDiagnosticQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get the initial non-certifying knowledge diagnostic
+ */
+
+export function useGetInitialDiagnostic<TData = Awaited<ReturnType<typeof getInitialDiagnostic>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getInitialDiagnostic>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetInitialDiagnosticQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSubmitInitialDiagnosticUrl = () => {
+
+
+
+
+  return `/api/diagnostic/submit`
+}
+
+/**
+ * @summary Evaluate and record a diagnostic attempt
+ */
+export const submitInitialDiagnostic = async (diagnosticSubmissionInput: DiagnosticSubmissionInput, options?: Parameters<typeof customFetch>[1]): Promise<DiagnosticResultResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<DiagnosticResultResponse>(getSubmitInitialDiagnosticUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(diagnosticSubmissionInput)
+  }
+);}
+
+
+
+
+
+export const getSubmitInitialDiagnosticMutationKey = () => ['submitInitialDiagnostic'] as const;
+
+export const getSubmitInitialDiagnosticMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitInitialDiagnostic>>, TError,SubmitInitialDiagnosticMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitInitialDiagnostic>>, TError,SubmitInitialDiagnosticMutationVariables, TContext> => {
+
+const mutationKey = getSubmitInitialDiagnosticMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitInitialDiagnostic>>, SubmitInitialDiagnosticMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitInitialDiagnostic(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitInitialDiagnosticMutationResult = NonNullable<Awaited<ReturnType<typeof submitInitialDiagnostic>>>
+    export type SubmitInitialDiagnosticMutationBody = BodyType<DiagnosticSubmissionInput>
+    export type SubmitInitialDiagnosticMutationError = ErrorType<ErrorResponse>
+    export type SubmitInitialDiagnosticMutationVariables = {data: BodyType<DiagnosticSubmissionInput>}
+
+    /**
+ * @summary Evaluate and record a diagnostic attempt
+ */
+export const useSubmitInitialDiagnostic = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitInitialDiagnostic>>, TError,SubmitInitialDiagnosticMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitInitialDiagnostic>>,
+        TError,
+        SubmitInitialDiagnosticMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubmitInitialDiagnosticMutationOptions(options));
+    }
 

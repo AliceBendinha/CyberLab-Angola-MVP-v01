@@ -3,7 +3,7 @@ import { useAuth } from "../auth/auth-provider";
 import { getApiErrorMessage } from "../auth/auth-errors";
 import DashboardPage from "../pages/dashboard-page";
 
-export default function ProtectedRoute() {
+export default function ProtectedRoute({ children }: { children?: React.ReactNode }) {
   const { user, isLoading, isUnauthenticated, error, retry } = useAuth();
 
   if (isLoading) {
@@ -17,7 +17,7 @@ export default function ProtectedRoute() {
   }
 
   if (user) {
-    return <DashboardPage />;
+    return children ?? <DashboardPage />;
   }
 
   if (isUnauthenticated || !error) {

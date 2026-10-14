@@ -65,3 +65,252 @@ export const TestAccessResponseValue = {
 } as const;
 export type TestAccessResponse = typeof TestAccessResponseValue;
 
+export type LearningLevel = typeof LearningLevel[keyof typeof LearningLevel];
+
+
+export const LearningLevel = {
+  BEGINNER: 'BEGINNER',
+  ELEMENTARY: 'ELEMENTARY',
+  INTERMEDIATE: 'INTERMEDIATE',
+} as const;
+
+export type MissionDifficulty = typeof MissionDifficulty[keyof typeof MissionDifficulty];
+
+
+export const MissionDifficulty = {
+  EASY: 'EASY',
+  MEDIUM: 'MEDIUM',
+  HARD: 'HARD',
+} as const;
+
+export interface StudentProfile {
+  id: string;
+  name: string;
+  email: string;
+  learningLevel: LearningLevel;
+  diagnosticCompleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudentProfileUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+}
+
+export interface MissionAnswerOption {
+  id: string;
+  text: string;
+}
+
+export interface ModuleProgress {
+  /** @minimum 0 */
+  completedMissions: number;
+  /** @minimum 0 */
+  totalMissions: number;
+  /** @minimum 0 */
+  pointsEarned: number;
+  /** @minimum 0 */
+  pointsAvailable: number;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  completionPercent: number;
+  /** @nullable */
+  lastActivityAt: string | null;
+}
+
+export interface LearningModuleSummary {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  order: number;
+  /** @minimum 0 */
+  missionCount: number;
+  progress: ModuleProgress;
+}
+
+export type LearningModuleListResponse = LearningModuleSummary[];
+
+export interface MissionSummary {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  difficulty: MissionDifficulty;
+  /** @minimum 0 */
+  points: number;
+  order: number;
+  /** @minimum 0 */
+  attemptCount: number;
+  isCompleted: boolean;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  bestScore: number | null;
+  /** @nullable */
+  lastAttemptAt: string | null;
+}
+
+export type ModuleMissionListResponse = MissionSummary[];
+
+export interface MissionDetailResponse {
+  id: string;
+  moduleId: string;
+  title: string;
+  slug: string;
+  description: string;
+  scenario: string;
+  instructions: string;
+  question: string;
+  answerOptions: MissionAnswerOption[];
+  difficulty: MissionDifficulty;
+  /** @minimum 0 */
+  points: number;
+  order: number;
+  /** @minimum 0 */
+  attemptCount: number;
+  isCompleted: boolean;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  bestScore: number | null;
+}
+
+export interface MissionAttemptInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  submittedAnswer: string;
+}
+
+export interface MissionAttemptResult {
+  id: string;
+  missionId: string;
+  submittedAnswerText: string;
+  isCorrect: boolean;
+  /** @minimum 0 */
+  score: number;
+  /** @minimum 0 */
+  maxScore: number;
+  /** @minimum 1 */
+  attemptNumber: number;
+  feedback: string;
+  explanation: string;
+  completedAt: string;
+}
+
+export interface MissionAttemptRecord {
+  id: string;
+  missionId: string;
+  missionTitle: string;
+  submittedAnswerText: string;
+  isCorrect: boolean;
+  /** @minimum 0 */
+  score: number;
+  /** @minimum 1 */
+  attemptNumber: number;
+  startedAt: string;
+  completedAt: string;
+}
+
+export type MissionAttemptHistoryResponse = MissionAttemptRecord[];
+
+export interface RecommendedModule {
+  slug: string;
+  title: string;
+}
+
+export interface DiagnosticHistoryRecord {
+  attemptId: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  score: number;
+  learningLevel: LearningLevel;
+  /** @minimum 0 */
+  correctAnswers: number;
+  /** @minimum 1 */
+  totalQuestions: number;
+  completedAt: string;
+  recommendedModule: RecommendedModule;
+}
+
+export interface StudentProgressResponse {
+  learningLevel: LearningLevel;
+  /** @minimum 0 */
+  completedMissions: number;
+  /** @minimum 0 */
+  totalMissions: number;
+  /** @minimum 0 */
+  pointsEarned: number;
+  /** @minimum 0 */
+  pointsAvailable: number;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  completionPercent: number;
+  modules: LearningModuleSummary[];
+  recentAttempts: MissionAttemptRecord[];
+  diagnosticHistory: DiagnosticHistoryRecord[];
+}
+
+export interface DiagnosticQuestionOption {
+  id: string;
+  text: string;
+}
+
+export interface DiagnosticQuestion {
+  id: string;
+  topic: string;
+  question: string;
+  options: DiagnosticQuestionOption[];
+}
+
+export interface DiagnosticQuestionsResponse {
+  title: string;
+  introduction: string;
+  /** @minimum 1 */
+  totalQuestions: number;
+  questions: DiagnosticQuestion[];
+}
+
+export interface DiagnosticAnswerInput {
+  questionId: string;
+  selectedOptionId: string;
+}
+
+export interface DiagnosticSubmissionInput {
+  /**
+     * @minItems 10
+     * @maxItems 10
+     */
+  answers: DiagnosticAnswerInput[];
+}
+
+export interface DiagnosticResultResponse {
+  attemptId: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  score: number;
+  /** @minimum 0 */
+  correctAnswers: number;
+  /** @minimum 1 */
+  totalQuestions: number;
+  learningLevel: LearningLevel;
+  completedAt: string;
+  recommendedModule: RecommendedModule;
+}
+

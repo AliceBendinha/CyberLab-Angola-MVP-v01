@@ -12,8 +12,14 @@
     "db:migrate": "prisma migrate dev --schema prisma/schema.prisma",
     "db:migrate:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
     "db:migrate:status": "prisma migrate status --schema prisma/schema.prisma",
-    "test:auth": "node ./scripts/run-auth-tests.mjs",
+    "db:seed": "prisma db seed --schema prisma/schema.prisma",
+    "test:auth": "node ./scripts/run-auth-tests.mjs --auth",
+    "test:learning": "node ./scripts/run-auth-tests.mjs --learning",
+    "test:integration": "node ./scripts/run-auth-tests.mjs --all",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

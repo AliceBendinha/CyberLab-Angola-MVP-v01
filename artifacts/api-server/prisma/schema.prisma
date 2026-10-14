@@ -13,15 +13,30 @@ enum UserRole {
   ADMIN
 }
 
+enum LearningLevel {
+  BEGINNER
+  ELEMENTARY
+  INTERMEDIATE
+}
+
+enum MissionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         UserRole @default(STUDENT)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  sessions     Session[]
+  id                String              @id @default(cuid())
+  name              String
+  email             String              @unique
+  passwordHash      String
+  role              UserRole            @default(STUDENT)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  sessions          Session[]
+  studentProfile    StudentProfile?
+  missionAttempts   MissionAttempt[]
+  diagnosticAttempts DiagnosticAttempt[]
 }
 
 model Session {
@@ -34,4 +49,84 @@ model Session {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model StudentProfile {
+  id                  String        @id @default(cuid())
+  userId              String        @unique
+  learningLevel       LearningLevel @default(BEGINNER)
+  diagnosticCompleted Boolean       @default(false)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LearningModule {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  description String
+  order       Int
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  missions    Mission[]
+
+  @@index([published, order])
+}
+
+model Mission {
+  id            String            @id @default(cuid())
+  moduleId      String
+  title         String
+  slug          String            @unique
+  description   String
+  scenario      String
+  instructions  String
+  question      String
+  answerOptions Json
+  correctAnswer String
+  explanation   String
+  difficulty    MissionDifficulty
+  points        Int
+  order         Int
+  published     Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  module        LearningModule    @relation(fields: [moduleId], references: [id], onDelete: Restrict)
+  attempts      MissionAttempt[]
+
+  @@index([moduleId, published, order])
+}
+
+model MissionAttempt {
+  id             String   @id @default(cuid())
+  userId         String
+  missionId      String
+  submittedAnswer String
+  isCorrect      Boolean
+  score          Int
+  attemptNumber  Int
+  startedAt      DateTime
+  completedAt    DateTime
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission        Mission  @relation(fields: [missionId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, missionId, attemptNumber])
+  @@index([userId, createdAt])
+  @@index([missionId, userId])
+}
+
+model DiagnosticAttempt {
+  id           String        @id @default(cuid())
+  userId       String
+  answers      Json
+  score        Int
+  learningLevel LearningLevel
+  completedAt  DateTime
+  createdAt    DateTime      @default(now())
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt])
 }

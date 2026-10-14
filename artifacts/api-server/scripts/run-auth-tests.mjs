@@ -5,6 +5,19 @@ import { PrismaClient } from "@prisma/client";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const testSchema = "cyberlab_auth_test";
+const testMode = process.argv[2] ?? "--auth";
+const testFiles = {
+  "--auth": ["src/tests/auth.integration.test.ts"],
+  "--learning": ["src/tests/learning.integration.test.ts"],
+  "--all": [
+    "src/tests/auth.integration.test.ts",
+    "src/tests/learning.integration.test.ts",
+  ],
+}[testMode];
+
+if (!testFiles) {
+  throw new Error("Choose --auth, --learning, or --all.");
+}
 
 if (
   process.env.NODE_ENV === "production" ||
@@ -77,4 +90,5 @@ await runPnpm([
   "--schema",
   "prisma/schema.prisma",
 ]);
-await runPnpm(["exec", "tsx", "--test", "src/tests/auth.integration.test.ts"]);
+await runPnpm(["exec", "tsx", "prisma/seed.ts"]);
+await runPnpm(["exec", "tsx", "--test", ...testFiles]);

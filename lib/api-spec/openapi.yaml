@@ -14,6 +14,12 @@ tags:
     description: User authentication and session operations
   - name: authorization
     description: Temporary role access checks
+  - name: students
+    description: Student-owned profile and progress
+  - name: learning
+    description: Published learning modules and mission attempts
+  - name: diagnostic
+    description: Initial, non-certifying learning diagnostic
 paths:
   /health:
     get:
@@ -216,6 +222,396 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /students/me:
+    get:
+      operationId: getStudentMe
+      tags: [students]
+      summary: Get the authenticated student's own profile
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Current student's profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentProfile"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateStudentMe
+      tags: [students]
+      summary: Update the authenticated student's display name
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentProfileUpdate"
+      responses:
+        "200":
+          description: Updated student's profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentProfile"
+        "400":
+          description: Invalid profile update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /modules:
+    get:
+      operationId: listLearningModules
+      tags: [learning]
+      summary: List published learning modules and the current student's progress
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Published modules with the authenticated student's progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningModuleListResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /modules/{slug}:
+    get:
+      operationId: getLearningModule
+      tags: [learning]
+      summary: Get one published module
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+      responses:
+        "200":
+          description: Published module and current student's progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningModuleSummary"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Module not found or unpublished
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /modules/{slug}/missions:
+    get:
+      operationId: listModuleMissions
+      tags: [learning]
+      summary: List published missions in a published module
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+      responses:
+        "200":
+          description: Published mission summaries for the current student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModuleMissionListResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Module not found or unpublished
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /missions/{id}:
+    get:
+      operationId: getLearningMission
+      tags: [learning]
+      summary: Get a published mission without its answer key or explanation
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+      responses:
+        "200":
+          description: Mission prompt and safe answer options
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionDetailResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Mission not found or unpublished
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /missions/{id}/attempts:
+    get:
+      operationId: listMissionAttempts
+      tags: [learning]
+      summary: List only the authenticated student's attempts for a mission
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+      responses:
+        "200":
+          description: The current student's attempt history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionAttemptHistoryResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Mission not found or unpublished
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: submitMissionAttempt
+      tags: [learning]
+      summary: Submit and score an answer on the server
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissionAttemptInput"
+      responses:
+        "201":
+          description: Evaluated attempt with pedagogical feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionAttemptResult"
+        "400":
+          description: Invalid answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Mission not found or unpublished
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /students/me/progress:
+    get:
+      operationId: getStudentProgress
+      tags: [students]
+      summary: Get the authenticated student's progress and learning history
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Progress and history belonging to the current student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentProgressResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /diagnostic:
+    get:
+      operationId: getInitialDiagnostic
+      tags: [diagnostic]
+      summary: Get the initial non-certifying knowledge diagnostic
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Diagnostic questions without correct answers or explanations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticQuestionsResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /diagnostic/submit:
+    post:
+      operationId: submitInitialDiagnostic
+      tags: [diagnostic]
+      summary: Evaluate and record a diagnostic attempt
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DiagnosticSubmissionInput"
+      responses:
+        "201":
+          description: Estimated level and recommended starting module
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticResultResponse"
+        "400":
+          description: Invalid or incomplete diagnostic answers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Student role required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     sessionCookie:
@@ -304,4 +700,475 @@ components:
           type: boolean
           const: true
       required: [ok]
+    LearningLevel:
+      type: string
+      enum: [BEGINNER, ELEMENTARY, INTERMEDIATE]
+    MissionDifficulty:
+      type: string
+      enum: [EASY, MEDIUM, HARD]
+    StudentProfile:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        learningLevel:
+          $ref: "#/components/schemas/LearningLevel"
+        diagnosticCompleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - learningLevel
+        - diagnosticCompleted
+        - createdAt
+        - updatedAt
+    StudentProfileUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+      required: [name]
+    MissionAnswerOption:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+      required: [id, text]
+    ModuleProgress:
+      type: object
+      additionalProperties: false
+      properties:
+        completedMissions:
+          type: integer
+          minimum: 0
+        totalMissions:
+          type: integer
+          minimum: 0
+        pointsEarned:
+          type: integer
+          minimum: 0
+        pointsAvailable:
+          type: integer
+          minimum: 0
+        completionPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        lastActivityAt:
+          type: [string, "null"]
+          format: date-time
+      required:
+        - completedMissions
+        - totalMissions
+        - pointsEarned
+        - pointsAvailable
+        - completionPercent
+        - lastActivityAt
+    LearningModuleSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+        missionCount:
+          type: integer
+          minimum: 0
+        progress:
+          $ref: "#/components/schemas/ModuleProgress"
+      required: [id, title, slug, description, order, missionCount, progress]
+    LearningModuleListResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/LearningModuleSummary"
+    MissionSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        difficulty:
+          $ref: "#/components/schemas/MissionDifficulty"
+        points:
+          type: integer
+          minimum: 0
+        order:
+          type: integer
+        attemptCount:
+          type: integer
+          minimum: 0
+        isCompleted:
+          type: boolean
+        bestScore:
+          type: [integer, "null"]
+          minimum: 0
+        lastAttemptAt:
+          type: [string, "null"]
+          format: date-time
+      required:
+        - id
+        - title
+        - slug
+        - description
+        - difficulty
+        - points
+        - order
+        - attemptCount
+        - isCompleted
+        - bestScore
+        - lastAttemptAt
+    ModuleMissionListResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/MissionSummary"
+    MissionDetailResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        moduleId:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        scenario:
+          type: string
+        instructions:
+          type: string
+        question:
+          type: string
+        answerOptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/MissionAnswerOption"
+        difficulty:
+          $ref: "#/components/schemas/MissionDifficulty"
+        points:
+          type: integer
+          minimum: 0
+        order:
+          type: integer
+        attemptCount:
+          type: integer
+          minimum: 0
+        isCompleted:
+          type: boolean
+        bestScore:
+          type: [integer, "null"]
+          minimum: 0
+      required:
+        - id
+        - moduleId
+        - title
+        - slug
+        - description
+        - scenario
+        - instructions
+        - question
+        - answerOptions
+        - difficulty
+        - points
+        - order
+        - attemptCount
+        - isCompleted
+        - bestScore
+    MissionAttemptInput:
+      type: object
+      additionalProperties: false
+      properties:
+        submittedAnswer:
+          type: string
+          minLength: 1
+          maxLength: 120
+      required: [submittedAnswer]
+    MissionAttemptResult:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        missionId:
+          type: string
+        submittedAnswerText:
+          type: string
+        isCorrect:
+          type: boolean
+        score:
+          type: integer
+          minimum: 0
+        maxScore:
+          type: integer
+          minimum: 0
+        attemptNumber:
+          type: integer
+          minimum: 1
+        feedback:
+          type: string
+        explanation:
+          type: string
+        completedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - missionId
+        - submittedAnswerText
+        - isCorrect
+        - score
+        - maxScore
+        - attemptNumber
+        - feedback
+        - explanation
+        - completedAt
+    MissionAttemptRecord:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        missionId:
+          type: string
+        missionTitle:
+          type: string
+        submittedAnswerText:
+          type: string
+        isCorrect:
+          type: boolean
+        score:
+          type: integer
+          minimum: 0
+        attemptNumber:
+          type: integer
+          minimum: 1
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - missionId
+        - missionTitle
+        - submittedAnswerText
+        - isCorrect
+        - score
+        - attemptNumber
+        - startedAt
+        - completedAt
+    MissionAttemptHistoryResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/MissionAttemptRecord"
+    StudentProgressResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        learningLevel:
+          $ref: "#/components/schemas/LearningLevel"
+        completedMissions:
+          type: integer
+          minimum: 0
+        totalMissions:
+          type: integer
+          minimum: 0
+        pointsEarned:
+          type: integer
+          minimum: 0
+        pointsAvailable:
+          type: integer
+          minimum: 0
+        completionPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/LearningModuleSummary"
+        recentAttempts:
+          type: array
+          items:
+            $ref: "#/components/schemas/MissionAttemptRecord"
+        diagnosticHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiagnosticHistoryRecord"
+      required:
+        - learningLevel
+        - completedMissions
+        - totalMissions
+        - pointsEarned
+        - pointsAvailable
+        - completionPercent
+        - modules
+        - recentAttempts
+        - diagnosticHistory
+    DiagnosticQuestionOption:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+      required: [id, text]
+    DiagnosticQuestion:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        topic:
+          type: string
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiagnosticQuestionOption"
+      required: [id, topic, question, options]
+    DiagnosticQuestionsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+        introduction:
+          type: string
+        totalQuestions:
+          type: integer
+          minimum: 1
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiagnosticQuestion"
+      required: [title, introduction, totalQuestions, questions]
+    DiagnosticAnswerInput:
+      type: object
+      additionalProperties: false
+      properties:
+        questionId:
+          type: string
+        selectedOptionId:
+          type: string
+      required: [questionId, selectedOptionId]
+    DiagnosticSubmissionInput:
+      type: object
+      additionalProperties: false
+      properties:
+        answers:
+          type: array
+          minItems: 10
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/DiagnosticAnswerInput"
+      required: [answers]
+    RecommendedModule:
+      type: object
+      additionalProperties: false
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+      required: [slug, title]
+    DiagnosticResultResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        attemptId:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        correctAnswers:
+          type: integer
+          minimum: 0
+        totalQuestions:
+          type: integer
+          minimum: 1
+        learningLevel:
+          $ref: "#/components/schemas/LearningLevel"
+        completedAt:
+          type: string
+          format: date-time
+        recommendedModule:
+          $ref: "#/components/schemas/RecommendedModule"
+      required:
+        - attemptId
+        - score
+        - correctAnswers
+        - totalQuestions
+        - learningLevel
+        - completedAt
+        - recommendedModule
+    DiagnosticHistoryRecord:
+      type: object
+      additionalProperties: false
+      properties:
+        attemptId:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        learningLevel:
+          $ref: "#/components/schemas/LearningLevel"
+        correctAnswers:
+          type: integer
+          minimum: 0
+        totalQuestions:
+          type: integer
+          minimum: 1
+        completedAt:
+          type: string
+          format: date-time
+        recommendedModule:
+          $ref: "#/components/schemas/RecommendedModule"
+      required:
+        - attemptId
+        - score
+        - learningLevel
+        - correctAnswers
+        - totalQuestions
+        - completedAt
+        - recommendedModule
 
