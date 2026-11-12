@@ -1,2 +1,3 @@
 - [Prisma schema placement](prisma-schema-placement.md) — keep the schema in the owning API package so Prisma resolves that package’s CLI and client in pnpm workspaces.
+- [Prisma seed entrypoint](prisma-seed-entrypoint.md) — invoke the API package’s seed script directly; Prisma 6.19.3 warns on `package.json#prisma` metadata.
 - [Replit runtime environment labels](replit-env-labels.md) — do not infer the database target from `REPLIT_ENVIRONMENT` alone; verify the active development context.

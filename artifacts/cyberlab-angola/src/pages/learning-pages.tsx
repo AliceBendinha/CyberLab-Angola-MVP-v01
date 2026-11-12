@@ -71,9 +71,56 @@ export function DashboardLearningPage() {
     } catch (error) { setEditError(getApiErrorMessage(error, 'Não foi possível actualizar o nome.')); }
   }
   const firstModule = modules.data?.[0];
+  const latestDiagnostic = progress.data?.diagnosticHistory[0];
+  const recommendedModule = latestDiagnostic
+    ? modules.data?.find(module =>
+      module.slug === latestDiagnostic.recommendedModule.slug &&
+      module.progress.completedMissions < module.progress.totalMissions
+    )
+    : undefined;
+  const nextModule = recommendedModule ??
+    modules.data?.find(module =>
+      module.progress.completedMissions < module.progress.totalMissions
+    ) ??
+    firstModule;
+  const nextStep = !profile.data?.diagnosticCompleted
+    ? {
+      to: '/diagnostic',
+      title: 'Concluir o diagnóstico inicial',
+      description: 'O resultado guardado indica um ponto de partida para o teu percurso.',
+      action: 'Fazer diagnóstico',
+    }
+    : nextModule
+      ? {
+        to: `/modules/${nextModule.slug}`,
+        title: `Continuar em ${nextModule.title}`,
+        description: `${nextModule.progress.completedMissions} de ${nextModule.progress.totalMissions} missões concluídas neste módulo.`,
+        action: 'Abrir módulo recomendado',
+      }
+      : modules.data?.length
+        ? {
+          to: '/progress',
+          title: 'Rever o teu progresso',
+          description: 'Já concluíste as missões publicadas; consulta o teu histórico.',
+          action: 'Ver progresso',
+        }
+        : {
+          to: '/modules',
+          title: 'Explorar módulos',
+          description: 'Consulta os módulos publicados disponíveis para a tua conta.',
+          action: 'Ver módulos',
+        };
   return <LearningFrame>
     <PageHeading eyebrow="PAINEL DE APRENDIZAGEM" title={`Olá, ${profile.data?.name ?? user?.name ?? ''}.`} description="Continue de onde parou. Cada missão é uma oportunidade de praticar com segurança." />
     {(profile.isPending || progress.isPending) ? <LoadingBlock /> : (profile.isError || progress.isError) ? <ErrorBlock error={profile.error ?? progress.error} retry={() => { void profile.refetch(); void progress.refetch(); }} /> : <>
+      <div className="dashboard-indicator-row">
+        <span className={`diagnostic-status ${profile.data.diagnosticCompleted ? 'complete' : 'pending'}`}>
+          {profile.data.diagnosticCompleted ? 'Diagnóstico concluído' : 'Diagnóstico pendente'}
+        </span>
+        <span className="dashboard-module-count" aria-live="polite">
+          {modules.isPending ? 'A carregar módulos…' : modules.isError ? 'Módulos temporariamente indisponíveis' : `${modules.data.length} módulos disponíveis`}
+        </span>
+      </div>
       {progress.data && <section className="welcome-progress">
         <div className="welcome-progress-copy"><div className="eyebrow">O SEU PERCURSO</div><h2>Aprender, praticando.</h2><p>O seu progresso fica guardado para que possa retomar a qualquer momento.</p><Link to={firstModule ? `/modules/${firstModule.slug}` : '/modules'} className="button button-primary">{progress.data.completedMissions > 0 ? 'Retomar aprendizagem' : 'Explorar módulos'}<ArrowRight size={16} /></Link></div>
         <div className="progress-orbit"><strong>{progress.data.completionPercent}%</strong><span>concluído</span><div className="orbit-track"><i style={{ transform: `rotate(${Math.max(0, Math.min(100, progress.data.completionPercent)) * 3.6}deg)` }} /></div></div>
@@ -90,7 +137,7 @@ export function DashboardLearningPage() {
         <section className="content-panel">
           <div className="panel-heading"><div><div className="eyebrow">ACESSO RÁPIDO</div><h2>Próxima etapa</h2></div></div>
           <div className="quick-links">
-            {!profile.data?.diagnosticCompleted && <Link to="/diagnostic" className="quick-link"><span className="quick-icon"><ClipboardIcon /></span><span><strong>Fazer diagnóstico inicial</strong><small>Descubra o seu nível de partida</small></span><ArrowRight size={16} /></Link>}
+            <Link to={nextStep.to} className="quick-link"><span className="quick-icon"><ClipboardIcon /></span><span><strong>{nextStep.title}</strong><small>{nextStep.description}</small></span><ArrowRight size={16} /></Link>
             <Link to="/modules" className="quick-link"><span className="quick-icon"><BookIcon /></span><span><strong>Ver módulos publicados</strong><small>Missões práticas ao seu ritmo</small></span><ArrowRight size={16} /></Link>
             <Link to="/progress" className="quick-link"><span className="quick-icon"><ProgressIcon /></span><span><strong>Consultar progresso</strong><small>Histórico e actividade recente</small></span><ArrowRight size={16} /></Link>
           </div>
@@ -99,6 +146,18 @@ export function DashboardLearningPage() {
       <section className="section-block"><div className="section-title-row"><div><div className="eyebrow">CONTINUE A PRATICAR</div><h2>Módulos publicados</h2></div><Link className="text-link" to="/modules">Ver todos <ArrowRight size={15} /></Link></div>
         {modules.isPending ? <LoadingBlock label="A procurar módulos disponíveis…" /> : modules.isError ? <ErrorBlock error={modules.error} retry={() => void modules.refetch()} /> : !modules.data?.length ? <EmptyState title="Ainda não há módulos publicados" text="Quando estiverem disponíveis, encontrará aqui percursos de aprendizagem práticos." /> :
           <div className="module-list">{modules.data.slice(0, 3).map((module, index) => <Link to={`/modules/${module.slug}`} key={module.id} className="module-row"><span className="module-index">{String(index + 1).padStart(2, '0')}</span><div className="module-row-body"><div className="module-row-title"><strong>{module.title}</strong><span>{module.progress.completedMissions}/{module.progress.totalMissions} missões</span></div><ProgressBar value={module.progress.completionPercent} /></div><ArrowRight size={17} /></Link>)}</div>}
+      </section>
+      <section className="section-block">
+        <div className="section-title-row"><div><div className="eyebrow">ACTIVIDADE RECENTE</div><h2>Últimas tentativas</h2></div><Link className="text-link" to="/progress">Histórico completo <ArrowRight size={15} /></Link></div>
+        {!progress.data.recentAttempts.length
+          ? <EmptyState title="Ainda sem actividade" text="As tuas tentativas aparecerão aqui depois de submeteres uma resposta." to="/modules" action="Encontrar uma missão" />
+          : <div className="dashboard-recent-list">{progress.data.recentAttempts.slice(0, 3).map(attempt =>
+            <div className="dashboard-recent-item" key={attempt.id}>
+              <div><strong>{attempt.missionTitle}</strong><span>{attempt.isCorrect ? 'Resposta correta' : 'Tentativa registada'} · tentativa {attempt.attemptNumber}</span></div>
+              <b>{attempt.score} pts</b>
+              <small>{dateLabel(attempt.completedAt)}</small>
+            </div>
+          )}</div>}
       </section>
       <div className="placeholder-strip"><div className="placeholder-symbol"><Sparkles size={19} /></div><div><strong>Tutor IA e Competências</strong><span>Estas áreas continuam como espaços reservados nesta versão.</span></div><span className="soon-tag">EM BREVE</span></div>
     </>}
@@ -146,7 +205,7 @@ export function MissionPage() {
     if (!choice || locked || submit.isPending) return;
     setLocked(true); setSubmitError('');
     try {
-      const answer = await submit.mutateAsync({ id, data: { submittedAnswer: mission.data?.answerOptions.find(option => option.id === choice)?.text ?? choice } });
+      const answer = await submit.mutateAsync({ id, data: { submittedAnswer: choice } });
       setResult(answer);
       setChoice('');
       await Promise.all([
@@ -198,10 +257,11 @@ export function DiagnosticPage() {
     } catch (err) { setError(getApiErrorMessage(err, 'Não foi possível guardar o diagnóstico.')); }
   }
   return <LearningFrame><PageHeading eyebrow="PONTO DE PARTIDA" title={diagnostic.data?.title ?? 'Diagnóstico inicial'} description={diagnostic.data?.introduction ?? 'Responda às perguntas para orientar o seu percurso.'} />
-    {diagnostic.isPending || profile.isPending ? <LoadingBlock label="A preparar o diagnóstico…" /> : diagnostic.isError ? <ErrorBlock error={diagnostic.error} retry={() => void diagnostic.refetch()} /> : profile.isError ? <ErrorBlock error={profile.error} retry={() => void profile.refetch()} /> : profile.data.diagnosticCompleted ? <EmptyState title="Diagnóstico já concluído" text="O seu resultado está guardado no histórico. Pode consultar o resultado e continuar o percurso recomendado." to="/progress" action="Ver histórico" /> : <>
+    {diagnostic.isPending || profile.isPending ? <LoadingBlock label="A preparar o diagnóstico…" /> : diagnostic.isError ? <ErrorBlock error={diagnostic.error} retry={() => void diagnostic.refetch()} /> : profile.isError ? <ErrorBlock error={profile.error} retry={() => void profile.refetch()} /> : <>
+      {profile.data.diagnosticCompleted && <div className="diagnostic-repeat-note" role="status">Já existe um resultado guardado. Podes repetir o diagnóstico; as tentativas anteriores serão mantidas no histórico.</div>}
       <div className="diagnostic-intro"><ShieldCheck size={20} /><span>Não é um exame. As suas respostas ajudam a encontrar o ponto de partida adequado.</span><strong>{diagnostic.data.totalQuestions} perguntas</strong></div>
       {error && <p className="form-alert" role="alert">{error}</p>}
-      <form className="diagnostic-form" onSubmit={submitAnswers}>{diagnostic.data.questions.map((question, index) => <fieldset className="diagnostic-question" key={question.id} disabled={submit.isPending}><legend><span className="question-number">{String(index + 1).padStart(2, '0')}</span><span><small>{question.topic}</small>{question.question}</span></legend><div className="diagnostic-options">{question.options.map(option => <label key={option.id} className={`answer-option ${answers[question.id] === option.id ? 'selected' : ''}`}><input type="radio" name={`question-${question.id}`} value={option.id} checked={answers[question.id] === option.id} onChange={() => setAnswers(current => ({ ...current, [question.id]: option.id }))} /><span className="radio-custom" /><span>{option.text}</span></label>)}</div></fieldset>)}<div className="diagnostic-submit"><span>{Object.keys(answers).length} / {diagnostic.data.questions.length} respondidas</span><button className="button button-primary" disabled={submit.isPending || Object.keys(answers).length !== diagnostic.data.questions.length}>{submit.isPending ? 'A guardar respostas…' : 'Concluir diagnóstico'}<ArrowRight size={16} /></button></div></form>
+      <form className="diagnostic-form" onSubmit={submitAnswers}>{diagnostic.data.questions.map((question, index) => <fieldset className="diagnostic-question" key={question.id} disabled={submit.isPending}><legend><span className="question-number">{String(index + 1).padStart(2, '0')}</span><span><small>{question.topic}</small>{question.question}</span></legend><div className="diagnostic-options">{question.options.map(option => <label key={option.id} className={`answer-option ${answers[question.id] === option.id ? 'selected' : ''}`}><input type="radio" name={`question-${question.id}`} value={option.id} checked={answers[question.id] === option.id} onChange={() => setAnswers(current => ({ ...current, [question.id]: option.id }))} /><span className="radio-custom" /><span>{option.text}</span></label>)}</div></fieldset>)}<div className="diagnostic-submit"><span>{Object.keys(answers).length} / {diagnostic.data.questions.length} respondidas</span><button className="button button-primary" disabled={submit.isPending || Object.keys(answers).length !== diagnostic.data.questions.length}>{submit.isPending ? 'A guardar respostas…' : profile.data.diagnosticCompleted ? 'Repetir diagnóstico' : 'Concluir diagnóstico'}<ArrowRight size={16} /></button></div></form>
     </>}
   </LearningFrame>;
 }

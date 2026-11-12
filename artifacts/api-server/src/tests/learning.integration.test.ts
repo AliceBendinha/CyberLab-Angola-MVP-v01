@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { after, before, describe, test } from "node:test";
 import bcrypt from "bcryptjs";
@@ -86,6 +87,24 @@ async function patchJson(
 async function get(path: string, cookie?: string): Promise<Response> {
   return fetch(`${apiBaseUrl}${path}`, {
     headers: requestHeaders(cookie),
+  });
+}
+
+function runSeed(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn("pnpm", ["exec", "tsx", "prisma/seed.ts"], {
+      cwd: process.cwd(),
+      env: process.env,
+      stdio: "ignore",
+    });
+    child.once("error", reject);
+    child.once("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error("The isolated seed command failed."));
+      }
+    });
   });
 }
 
@@ -328,7 +347,24 @@ describe("student learning engine", { concurrency: false }, () => {
     );
   });
 
-  test("7. returns a published module and its missions", async () => {
+  test("7. rejects nonexistent and unpublished modules and missions", async () => {
+    const hiddenMission = await prisma.mission.findUniqueOrThrow({
+      where: { slug: hiddenMissionSlug },
+      select: { id: true },
+    });
+    for (const path of [
+      `/modules/${hiddenSlug}`,
+      `/modules/${hiddenSlug}/missions`,
+      "/modules/not-a-real-module",
+      `/missions/${hiddenMission.id}`,
+      "/missions/not-a-real-mission",
+    ]) {
+      const response = await get(path, studentCookie);
+      assert.equal(response.status, 404, `${path} should not be accessible`);
+    }
+  });
+
+  test("8. returns a published module and its missions", async () => {
     const moduleResponse = await get(
       "/modules/fundamentos-ciberseguranca",
       studentCookie,
@@ -350,7 +386,7 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.equal(missions.length, 4);
   });
 
-  test("8. hides a mission's correct answer and explanation before submission", async () => {
+  test("9. hides a mission's correct answer and explanation before submission", async () => {
     const mission = await prisma.mission.findUniqueOrThrow({
       where: { slug: "distinguir-http-https" },
       select: { id: true },
@@ -366,7 +402,7 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.ok(Array.isArray(body.answerOptions));
   });
 
-  test("9. rejects an answer that is not one of the published options", async () => {
+  test("10. rejects an answer that is not one of the published options", async () => {
     const mission = await prisma.mission.findUniqueOrThrow({
       where: { slug: "distinguir-http-https" },
       select: { id: true },
@@ -381,7 +417,7 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.deepEqual(await history.json(), []);
   });
 
-  test("10. records an incorrect answer with zero points and feedback", async () => {
+  test("11. records an incorrect answer with zero points and feedback", async () => {
     const mission = await prisma.mission.findUniqueOrThrow({
       where: { slug: "distinguir-http-https" },
       select: { id: true, correctAnswer: true, points: true },
@@ -404,7 +440,7 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.equal("passwordHash" in attempt, false);
   });
 
-  test("11. scores a correct retry using the mission's configured points", async () => {
+  test("12. scores a correct retry using the mission's configured points", async () => {
     const mission = await prisma.mission.findUniqueOrThrow({
       where: { slug: "distinguir-http-https" },
       select: { id: true, correctAnswer: true, points: true },
@@ -422,7 +458,7 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.equal(attempt.attemptNumber, 2);
   });
 
-  test("12. keeps attempt history private to each student", async () => {
+  test("13. keeps attempt history private to each student", async () => {
     const mission = await prisma.mission.findUniqueOrThrow({
       where: { slug: "distinguir-http-https" },
       select: { id: true },
@@ -444,7 +480,7 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.deepEqual(await otherHistory.json(), []);
   });
 
-  test("13. progress counts the best score once, not the sum of retries", async () => {
+  test("14. progress counts the best score once, not the sum of retries", async () => {
     const mission = await prisma.mission.findUniqueOrThrow({
       where: { slug: "distinguir-http-https" },
       select: { id: true, correctAnswer: true, points: true },
@@ -467,7 +503,24 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.equal(networkModule.progress.pointsEarned, mission.points);
   });
 
-  test("14. GET /diagnostic returns ten questions without answer keys", async () => {
+  test("15. re-running seed does not duplicate the published modules or missions", async () => {
+    const countsBefore = {
+      modules: await prisma.learningModule.count({ where: { published: true } }),
+      missions: await prisma.mission.count({ where: { published: true } }),
+    };
+    assert.deepEqual(countsBefore, { modules: 3, missions: 12 });
+
+    await runSeed();
+    await runSeed();
+
+    const countsAfter = {
+      modules: await prisma.learningModule.count({ where: { published: true } }),
+      missions: await prisma.mission.count({ where: { published: true } }),
+    };
+    assert.deepEqual(countsAfter, countsBefore);
+  });
+
+  test("16. GET /diagnostic returns ten questions without answer keys", async () => {
     const response = await get("/diagnostic", studentCookie);
     assert.equal(response.status, 200);
     const body = (await response.json()) as DiagnosticQuestionsResponse &
@@ -477,15 +530,16 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.equal("correctAnswer" in body, false);
     assert.equal(
       body.questions.some(
-        (question: Record<string, unknown>) =>
-          "correctOptionId" in question || "explanation" in question,
+        (question) =>
+          Object.hasOwn(question, "correctOptionId") ||
+          Object.hasOwn(question, "explanation"),
       ),
       false,
     );
     assert.equal("passwordHash" in body, false);
   });
 
-  test("15. rejects incomplete and invalid diagnostic submissions", async () => {
+  test("17. rejects incomplete and invalid diagnostic submissions", async () => {
     const incomplete = await postJson(
       "/diagnostic/submit",
       { answers: [] },
@@ -507,13 +561,13 @@ describe("student learning engine", { concurrency: false }, () => {
     assert.equal(profile.diagnosticCompleted, false);
   });
 
-  test("16. classifies 40%, 50%, and 80% on the server and preserves repeats", async () => {
+  test("18. classifies 40%, 50%, and 80% on the server and preserves repeats", async () => {
     const expected = [
       { correct: 4, score: 40, level: "BEGINNER", module: "fundamentos-ciberseguranca" },
       { correct: 5, score: 50, level: "ELEMENTARY", module: "redes-seguranca-web" },
       { correct: 8, score: 80, level: "INTERMEDIATE", module: "phishing-engenharia-social" },
     ];
-    const results: Record<string, unknown>[] = [];
+    const resultIds: string[] = [];
     for (const item of expected) {
       const response = await postJson(
         "/diagnostic/submit",
@@ -529,12 +583,12 @@ describe("student learning engine", { concurrency: false }, () => {
       assert.equal(result.recommendedModule.slug, item.module);
       assert.equal("answers" in result, false);
       assert.equal("passwordHash" in result, false);
-      results.push(result);
+      resultIds.push(result.attemptId);
     }
-    assert.equal(new Set(results.map((result) => result.attemptId)).size, 3);
+    assert.equal(new Set(resultIds).size, 3);
   });
 
-  test("17. latest diagnostic determines the profile and all results remain in history", async () => {
+  test("19. latest diagnostic determines the profile and all results remain in history", async () => {
     const profileResponse = await get("/students/me", studentCookie);
     const profile = (await profileResponse.json()) as StudentProfile;
     assert.equal(profile.learningLevel, "INTERMEDIATE");
@@ -553,13 +607,14 @@ describe("student learning engine", { concurrency: false }, () => {
     );
     assert.ok(
       progress.diagnosticHistory.every(
-        (entry: Record<string, unknown>) =>
-          !("answers" in entry) && !("passwordHash" in entry),
+        (entry) =>
+          !Object.hasOwn(entry, "answers") &&
+          !Object.hasOwn(entry, "passwordHash"),
       ),
     );
   });
 
-  test("18. learning responses never include password hashes", async () => {
+  test("20. learning responses never include password hashes", async () => {
     const responses = await Promise.all([
       get("/students/me", studentCookie),
       get("/modules", studentCookie),

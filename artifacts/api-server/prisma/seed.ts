@@ -1,6 +1,6 @@
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { MissionDifficulty, Prisma, PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 const modules = [
   {
@@ -296,7 +296,7 @@ const modules = [
   },
 ];
 
-async function seed() {
+export async function seedLearningContent(prisma: PrismaClient) {
   for (const moduleSeed of modules) {
     const module = await prisma.learningModule.upsert({
       where: { slug: moduleSeed.slug },
@@ -325,8 +325,15 @@ async function seed() {
   }
 }
 
-try {
-  await seed();
-} finally {
-  await prisma.$disconnect();
+const executedDirectly =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+
+if (executedDirectly) {
+  const prisma = new PrismaClient();
+  try {
+    await seedLearningContent(prisma);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
